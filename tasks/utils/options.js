@@ -44,7 +44,36 @@ module.exports.updateOptions = function(newOptions) {
       skip: false,
       src: options.src,
       excludes: 'scss',
-      dist: options.dist
+      dist: options.dist,
+
+      /**
+       * Constructs the [source, exclusion] pair used when copying resources.
+       * Takes in an optional source location, defaults to the copy.src setting if not provided.
+       */
+      _buildSrcExclusionPair: function(optionalSrc) {
+        var sourceLoc = optionalSrc || this.src;
+        return [
+            sourceLoc + '/**/*.*',
+            '!' + sourceLoc + '/**/*.+(' + this.excludes + ')'
+        ]
+      },
+
+      /**
+       * Builds a flat map of all the [source, exclusion] pairs.
+       * Each item in the copy.src array will construct a new pair. If copy.src is just a single item, return the single pair.
+       */
+      buildFullSrcArray: function() {
+        var copyOptions = this;
+        if (Array.isArray(this.src)) {
+          return this.src.map(function(entry) {
+            return copyOptions._buildSrcExclusionPair(entry);
+          }).reduce(function(copy, exclude) {
+            return copy.concat(exclude);
+          });
+        } else {
+          return this._buildSrcExclusionPair();
+        }
+      }
     }
   };
 

@@ -11,10 +11,8 @@ module.exports = function(gulp, newCopyOptions) {
     gulp.task(options.taskPrefix + 'copy-resources', function() {
       var bytes = 0,
           startTime = +new Date();
-      return gulp.src([
-          options.copy.src + '/**/*.*',
-          '!' + options.copy.src + '/**/*.+(' + options.copy.excludes + ')'
-        ])
+
+      return gulp.src(options.copy.buildFullSrcArray())
         .pipe($.tap(function(file, callback) {
           bytes += fs.statSync(file.path).size;
           return callback;
