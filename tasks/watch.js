@@ -62,10 +62,14 @@ module.exports = function(gulp, options) {
       tasks.browserify.createWatchifyBundler();
     }
 
+    if (!options.jshint.skip) {
+      gulp.watch(options.jshint.src, [options.taskPrefix + 'jshint']);
+    }
+
     if (options.clean.skip) {
-      runSequence(buildTasks);
+      runSequence(options.taskPrefix + 'jshint', buildTasks);
     } else {
-      runSequence(options.taskPrefix + 'clean', buildTasks);
+      runSequence(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks);
     }
   });
 };

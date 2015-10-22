@@ -29,9 +29,9 @@ module.exports = function(gulp, options) {
     }
 
     if (options.clean.skip) {
-      runSequence(buildTasks, browserifyCompleteFn);
+      runSequence(options.taskPrefix + 'jshint', buildTasks, browserifyCompleteFn);
     } else {
-      runSequence(options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn);
+      runSequence(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn);
     }
   });
 

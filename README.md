@@ -47,12 +47,13 @@ var buildProcess = require('quick-sip')(gulp);
 ```
 
 The gulp tasks you care about are:
-- **clean** - Remove the contents of the dist directory
+- **clean** - Remove the contents of the dist directory.
+- **jshint** - Runs gulp-jshint against the javascript files in the src directory.
 - **build** - Builds the whole application; js, css, and resources.
 - **watch** - Sets up watchify for your js, listens for scss changes, and handles other resource changes.
-- **copy-resources** - Only copy the resources to dist (non-js and non-scss by default)
-- **build-styles** - Only builds the styles to dist
-- **build-app** - Only builds the javascript to dist
+- **copy-resources** - Only copy the resources to dist (non-js and non-scss by default).
+- **build-styles** - Only builds the styles to dist.
+- **build-app** - Only builds the javascript to dist.
 
 ## Transforming Browserify
 Easy!
@@ -114,6 +115,12 @@ The options are grouped by task with some top level defaults.  Default values fo
     root: options.src + '/app.scss',
     dist: options.dist
   },
+  jshint: {
+    src: './' + opts.src + '/**/*.js',
+    skip: true,
+    stopOnFail: true,
+    config: {}
+  },
   copy: {
     skip: false,
     src: options.src,
@@ -140,6 +147,21 @@ Whether the clean task should be skipped (`true`) or run (`false`).
 
 ##### [`clean.dist`=`options.dist`]
 Defaults to the dist value in the base options.  This is the directory that clean will delete when run.
+
+#### JSHint task options (task name: `options.taskPrefix + 'jshint'`):
+
+##### [`src`=`'./' + options.src + '/**/*.js'`]
+This determines the files the run the js linting on.
+Defaults to looking at all javascript files in the app directory.
+
+##### [`skip`=`false`]
+Whether the js lint (`jshint`) task should be skipped (`true`) or run (`false`).
+
+##### [`stopOnFail`=`true`]
+Whether warnings / errors should cause the task to fail or not.
+
+##### [`config`=`{}`]
+The jshint configuration json to use. Empty object will use the default found in jshint-stylish.
 
 #### Browserify task options (task name: `options.taskPrefix + 'build-app'`):
 ##### [`browserify.skip`=`false`]
