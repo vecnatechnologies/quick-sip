@@ -39,6 +39,12 @@ module.exports = function() {
         includes: [],
         dist: opts.dist
       },
+      jshint: {
+        src: './' + opts.src + '/**/*.js',
+        skip: false,
+        stopOnFail: true,
+        config: {}
+      },
       copy: {
         skip: false,
         src: opts.src,
