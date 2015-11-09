@@ -12,11 +12,19 @@ module.exports = function(gulp, options) {
 
   /* Handle single resource events for watch */
   function copyResource(evt, callback) {
-    var status = evt.type,
-        path = evt.path,
-        relPath = pathLib.relative('./' + options.copy.src, evt.path),
-        srcPath = path,
-        destPath = './' + options.copy.dist;
+    var relPath,
+        status = evt.type,
+        srcPath = evt.path,
+        copySrcPath = options.copy.src,
+        destPath = options.copy.dist;
+
+    if (!pathLib.isAbsolute(destPath)) {
+      destPath = './' + destPath;
+    }
+    if (!pathLib.isAbsolute(copySrcPath)) {
+      copySrcPath = './' + copySrcPath;
+    }
+    relPath = pathLib.relative(copySrcPath, srcPath);
 
     if (status === 'changed') {
       log.mark('[MODIFY] --> ' + relPath);
