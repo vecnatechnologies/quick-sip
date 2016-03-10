@@ -22,6 +22,7 @@ module.exports = function(gulp, options) {
             this.emit('end');
           }))
         .pipe($.autoprefixer())
+        .pipe($.util.env.type === 'production' ? $.cssmin() : $.util.noop())
         .pipe(gulp.dest(options.styles.dist));
     });
   }
