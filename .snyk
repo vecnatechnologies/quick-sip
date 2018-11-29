@@ -1,0 +1,22 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'npm:braces:20180219':
+    - gulp-load-plugins > micromatch > braces:
+        reason: 'Low, hard to fix.'
+        expires: '2018-12-29T17:00:25.466Z'
+    - gulp-load-plugins > findup-sync > micromatch > braces:
+        reason: 'Low, hard to fix.'
+        expires: '2018-12-29T17:00:25.466Z'
+    - watchify > anymatch > micromatch > braces:
+        reason: 'Low, hard to fix.'
+        expires: '2018-12-29T17:00:25.466Z'
+    - watchify > chokidar > anymatch > micromatch > braces:
+        reason: 'Low, hard to fix.'
+        expires: '2018-12-29T17:00:25.466Z'
+  'npm:clean-css:20180306':
+    - gulp-cssmin > clean-css:
+        reason: 'Low, hard to fix.'
+        expires: '2018-12-29T17:00:25.466Z'
+patch: {}
