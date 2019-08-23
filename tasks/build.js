@@ -36,5 +36,5 @@ module.exports = function(gulp, options) {
   });
 
   // Alias default to do the build.  After this file is run the default task can be overridden if desired.
-  gulp.task('default', ['build']);
+  gulp.task('default', [options.taskPrefix + 'build']);
 };
