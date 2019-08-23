@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.13.1
+version: v1.13.5
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'npm:braces:20180219':
@@ -19,4 +19,18 @@ ignore:
     - gulp-cssmin > clean-css:
         reason: 'Low, hard to fix.'
         expires: '2018-12-29T17:00:25.466Z'
-patch: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - gulp-jshint > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
+    - gulp-uglify > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
+    - jshint > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
+    - gulp-sass > node-sass > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
+    - gulp-sass > node-sass > sass-graph > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
+    - gulp-sass > node-sass > gaze > globule > lodash:
+        patched: '2019-08-23T14:28:22.372Z'
