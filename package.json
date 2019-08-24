@@ -39,7 +39,22 @@
   "scripts": {
     "test": "jasmine",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "release": "release-it"
   },
-  "snyk": true
+  "snyk": true,
+  "devDependencies": {
+    "release-it": "^12.3.5"
+  },
+  "release-it": {
+    "github": {
+      "release": true,
+      "releaseName": "Release v${version}"
+    },
+    "git": {
+      "tagName": "v${version}",
+      "commitMessage": "Release v${version}",
+      "tagAnnotation": "Release v${version}"
+    }
+  }
 }
