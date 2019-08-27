@@ -6,7 +6,8 @@ module.exports = function(gulp, options) {
 
   if (!options.copy.skip) {
     /* Copy all resources to dist */
-    gulp.task(options.taskPrefix + 'copy-resources', function() {
+    var taskName = options.taskPrefix + 'copy-resources';
+    gulp.task(taskName, function() {
       var bytes = 0,
           startTime = +new Date();
 
@@ -19,7 +20,7 @@ module.exports = function(gulp, options) {
         .pipe($.concat('tmp'))
         .pipe($.tap(function() {
           var endTime = +new Date();
-          log.mark('[RESOURCES] ' + bytes + ' bytes written (' + (endTime - startTime)/1000.0 + ' seconds)');
+          log.mark('[' + taskName + '] ' + bytes + ' bytes written (' + (endTime - startTime)/1000.0 + ' seconds)');
         }));
     });
   }

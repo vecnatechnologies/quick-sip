@@ -10,15 +10,18 @@ var minimist = require('minimist');
 var PRODUCTION_BUILD_TYPE = 'production';
 
 module.exports = function(gulp, options) {
+  var taskName = options.taskPrefix + 'build-app';
+  var logPrefix = '['  + taskName + '] ';
+
   var browserifyBundler;
 
-  function configureBrowserify(browserifyBundler) {
-    browserifyBundler.add(options.browserify.root);
+  function configureBrowserify(configureBrowserifyBundler) {
+    configureBrowserifyBundler.add(options.browserify.root);
     options.browserify.transforms.forEach(function(transform) {
       if (transform.transform) {
-        browserifyBundler.transform(transform.transform, transform.options);
+        configureBrowserifyBundler.transform(transform.transform, transform.options);
       } else {
-        browserifyBundler.transform(transform);
+        configureBrowserifyBundler.transform(transform);
       }
     });
   }
@@ -30,7 +33,7 @@ module.exports = function(gulp, options) {
     var pipe = browserifyBundler.bundle();
     pipe = pipe.on('error', function(err) {
         delete err.stream;
-        log.error('[BROWSERIFY] @ ' + currentDateTime());
+        log.error(logPrefix + ' @ ' + currentDateTime());
         log.warn(err.toString());
         if (!browserifyBundler.continueOnError && options.browserify.failOnError) {
           throw err;
@@ -49,13 +52,12 @@ module.exports = function(gulp, options) {
     if (buildType !== PRODUCTION_BUILD_TYPE) {
       pipe = pipe.pipe($.sourcemaps.write('./'));
     }
-    pipe = pipe.pipe(gulp.dest(options.browserify.dist));
-    return pipe;
+    return pipe.pipe(gulp.dest(options.browserify.dist));
   }
 
   if (!options.browserify.skip) {
     /* Reduce all javascript to app.js */
-    gulp.task(options.taskPrefix + 'build-app', buildApp);
+    gulp.task(taskName, buildApp);
   }
 
   return {
@@ -73,7 +75,7 @@ module.exports = function(gulp, options) {
       configureBrowserify(browserifyBundler);
       browserifyBundler.on('update', buildApp);
       browserifyBundler.on('log', function(data) {
-        log.mark('[BROWSERIFY] ' + data.toString());
+        log.mark(logPrefix + data.toString());
       });
       return browserifyBundler;
     }

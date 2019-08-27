@@ -9,7 +9,9 @@ module.exports = function(gulp, options) {
 
   if (!options.styles.skip) {
     /* Build all styles */
-    gulp.task(options.taskPrefix + 'build-styles', function() {
+    var taskName = options.taskPrefix + 'build-styles';
+    var logPrefix = '['  + taskName + '] ';
+    gulp.task(taskName, function() {
       var argv = minimist(process.argv.slice(2));
       var buildType = argv.type;
       var pipe = gulp.src(options.styles.root)
@@ -18,12 +20,12 @@ module.exports = function(gulp, options) {
           includePaths: options.styles.includes
         })
           .on('data', function(data) {
-            log.mark('[SASS] ' + data.contents.length + ' bytes written');
+            log.mark(logPrefix + data.contents.length + ' bytes written');
           })
           .on('error', function(err) {
-            log.error('[SASS] @ ' + currentDateTime());
-            log.warn('File: [line:' + err.line + ', col:' + err.column + '] ' + err.file);
-            log.warn('Message: ' + err.message);
+            log.error(logPrefix + ' @ ' + currentDateTime());
+            log.warn(logPrefix + 'File: [line:' + err.line + ', col:' + err.column + '] ' + err.file);
+            log.warn(logPrefix + 'Message: ' + err.message);
             this.emit('end');
           }))
         .pipe($.autoprefixer());
@@ -32,8 +34,7 @@ module.exports = function(gulp, options) {
         pipe = pipe.pipe($.cssmin())
       }
 
-      pipe = pipe.pipe(gulp.dest(options.styles.dist));
-      return pipe;
+      return pipe.pipe(gulp.dest(options.styles.dist));
     });
   }
 };
