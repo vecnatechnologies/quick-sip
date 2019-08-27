@@ -4,11 +4,11 @@ var createBundleTasks = require('./utils/createBundleTasks');
 module.exports = function(gulp, options) {
   var tasks = createBundleTasks(gulp, options);
 
-  function build() {
+  function build(buildDone) {
     var buildTasks = [];
-    function browserifyCompleteFn(callback) {
+    function browserifyCompleteFn(browserifyDone) {
       log.mark('[BROWSERIFY] complete!');
-      callback();
+      browserifyDone();
     }
 
     if (!options.styles.skip) {
@@ -25,9 +25,9 @@ module.exports = function(gulp, options) {
     }
 
     if (options.clean.skip) {
-      return gulp.series(options.taskPrefix + 'jshint', buildTasks, browserifyCompleteFn);
+      return gulp.series(options.taskPrefix + 'jshint', buildTasks, browserifyCompleteFn)(buildDone);
     } else {
-      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn);
+      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn)(buildDone);
     }
   }
 
