@@ -1,20 +1,24 @@
-var _ = require('lodash'),
-    $ = require('gulp-load-plugins')({});
+var _ = require('lodash');
+var $ = require('gulp-load-plugins')({});
+var minimist = require('minimist');
+
+var PRODUCTION_BUILD_TYPE = 'production';
 
 // Function creates a new options object each time
 // This options object should be generated once for each execution of quick-sip
 // and passed into all task registrations that require this object
 module.exports = function() {
+  var argv = minimist(process.argv.slice(2));
+  var buildType = argv.type;
   var baseDefaults = {
-        taskPrefix: '',
-        src: 'app',
-        dist: 'dist',
-        clean: {},
-        browserify: {},
-        styles: {},
-        copy: {}
-      },
-      options;
+    taskPrefix: '',
+    src: 'app',
+    dist: 'dist',
+    clean: {},
+    browserify: {},
+    styles: {},
+    copy: {}
+  };
 
   // Generate bundle defaults from an options parameter
   function generateBundleDefaults(opts) {
@@ -29,7 +33,7 @@ module.exports = function() {
         transforms: [],
         out: 'app.js',
         failOnError: false,
-        debug: $.util.env.type !== 'production',
+        debug: buildType !== PRODUCTION_BUILD_TYPE,
         dist: opts.dist
       },
       styles: {
@@ -83,7 +87,7 @@ module.exports = function() {
     };
   }
 
-  options = _.merge({}, baseDefaults, generateBundleDefaults(baseDefaults));
+  var options = _.merge({}, baseDefaults, generateBundleDefaults(baseDefaults));
 
   // Update options
   // For certain options, if a key isn't defined at the task level, it will default to the value specified at the top level
