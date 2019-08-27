@@ -1,22 +1,18 @@
-var $ = require('gulp-load-plugins')({}),
-    del = require('del'),
-    log = require('color-log'),
-    pathLib = require('path'),
-    runSequenceGenerator = require('run-sequence'),
-    createBundleTasks = require('./utils/createBundleTasks');
+var $ = require('gulp-load-plugins')({});
+var del = require('del');
+var log = require('color-log');
+var pathLib = require('path');
+var createBundleTasks = require('./utils/createBundleTasks');
 
 module.exports = function(gulp, options) {
-  var tasks;
-
-  tasks = createBundleTasks(gulp, options);
+  var tasks = createBundleTasks(gulp, options);
 
   /* Handle single resource events for watch */
   function copyResource(evt, callback) {
-    var relPath,
-        status = evt.type,
-        srcPath = evt.path,
-        copySrcPath = options.copy.src,
-        destPath = options.copy.dist;
+    var status = evt.type;
+    var srcPath = evt.path;
+    var copySrcPath = options.copy.src;
+    var destPath = options.copy.dist;
 
     if (!pathLib.isAbsolute(destPath)) {
       destPath = './' + destPath;
@@ -24,7 +20,7 @@ module.exports = function(gulp, options) {
     if (!pathLib.isAbsolute(copySrcPath)) {
       copySrcPath = './' + copySrcPath;
     }
-    relPath = pathLib.relative(copySrcPath, srcPath);
+    var relPath = pathLib.relative(copySrcPath, srcPath);
 
     if (status === 'changed') {
       log.mark('[MODIFY] --> ' + relPath);
@@ -49,8 +45,7 @@ module.exports = function(gulp, options) {
 
   /* Watch build */
   gulp.task(options.taskPrefix + 'watch', function() {
-    var runSequence = runSequenceGenerator.use(gulp),
-        buildTasks = [];
+    var buildTasks = [];
 
     if (!options.styles.skip) {
       buildTasks.push(options.taskPrefix + 'build-styles');
@@ -71,13 +66,13 @@ module.exports = function(gulp, options) {
     }
 
     if (!options.jshint.skip) {
-      gulp.watch(options.jshint.src, [options.taskPrefix + 'jshint']);
+      gulp.watch(options.jshint.src, gulp.series(options.taskPrefix + 'jshint'));
     }
 
     if (options.clean.skip) {
-      runSequence(options.taskPrefix + 'jshint', buildTasks);
+      return gulp.series(options.taskPrefix + 'jshint', buildTasks);
     } else {
-      runSequence(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks);
+      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks);
     }
   });
 };

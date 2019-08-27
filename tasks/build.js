@@ -1,14 +1,12 @@
-var log = require('color-log'),
-    runSequenceGenerator = require('run-sequence'),
-    createBundleTasks = require('./utils/createBundleTasks');
+var log = require('color-log');
+var createBundleTasks = require('./utils/createBundleTasks');
 
 module.exports = function(gulp, options) {
   var tasks = createBundleTasks(gulp, options);
 
   function build(callback) {
-    var runSequence = runSequenceGenerator.use(gulp),
-      buildTasks = [],
-      browserifyCompleteFn = function() {
+    var buildTasks = [];
+    var browserifyCompleteFn = function() {
         log.mark('[BROWSERIFY] complete!');
         callback();
       };
@@ -27,9 +25,9 @@ module.exports = function(gulp, options) {
     }
 
     if (options.clean.skip) {
-      runSequence(options.taskPrefix + 'jshint', buildTasks, browserifyCompleteFn);
+      return gulp.series(options.taskPrefix + 'jshint', buildTasks, browserifyCompleteFn);
     } else {
-      runSequence(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn);
+      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks, browserifyCompleteFn);
     }
   }
 
