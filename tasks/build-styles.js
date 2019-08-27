@@ -1,13 +1,18 @@
-var $ = require('gulp-load-plugins')({}),
-    log = require('color-log'),
-    currentDateTime = require('./utils/currentDateTime');
+var $ = require('gulp-load-plugins')({});
+var log = require('color-log');
+var currentDateTime = require('./utils/currentDateTime');
+var minimist = require('minimist');
+
+var PRODUCTION_BUILD_TYPE = 'production';
 
 module.exports = function(gulp, options) {
 
   if (!options.styles.skip) {
     /* Build all styles */
     gulp.task(options.taskPrefix + 'build-styles', function() {
-      return gulp.src(options.styles.root)
+      var argv = minimist(process.argv.slice(2));
+      var buildType = argv.type;
+      var pipe = gulp.src(options.styles.root)
         .pipe($.sass({
           file: options.styles.root,
           includePaths: options.styles.includes
@@ -21,9 +26,14 @@ module.exports = function(gulp, options) {
             log.warn('Message: ' + err.message);
             this.emit('end');
           }))
-        .pipe($.autoprefixer())
-        .pipe($.util.env.type === 'production' ? $.cssmin() : $.util.noop())
-        .pipe(gulp.dest(options.styles.dist));
+        .pipe($.autoprefixer());
+
+      if (buildType === PRODUCTION_BUILD_TYPE) {
+        pipe = pipe.pipe($.cssmin())
+      }
+
+      pipe = pipe.pipe(gulp.dest(options.styles.dist));
+      return pipe;
     });
   }
 };

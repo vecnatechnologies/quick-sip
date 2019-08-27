@@ -1,10 +1,13 @@
-var $ = require('gulp-load-plugins')({}),
-    log = require('color-log'),
-    watchify = require('watchify'),
-    browserify = require('browserify'),
-    currentDateTime = require('./utils/currentDateTime'),
-    source = require('vinyl-source-stream'),
-    buffer = require('vinyl-buffer');
+var $ = require('gulp-load-plugins')({});
+var log = require('color-log');
+var watchify = require('watchify');
+var browserify = require('browserify');
+var currentDateTime = require('./utils/currentDateTime');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var minimist = require('minimist');
+
+var PRODUCTION_BUILD_TYPE = 'production';
 
 module.exports = function(gulp, options) {
   var browserifyBundler;
@@ -22,8 +25,10 @@ module.exports = function(gulp, options) {
 
   /* Reduce all javascript to app.js */
   function buildApp() {
-    return browserifyBundler.bundle()
-      .on('error', function(err) {
+    var argv = minimist(process.argv.slice(2));
+    var buildType = argv.type;
+    var pipe = browserifyBundler.bundle();
+    pipe = pipe.on('error', function(err) {
         delete err.stream;
         log.error('[BROWSERIFY] @ ' + currentDateTime());
         log.warn(err.toString());
@@ -31,13 +36,21 @@ module.exports = function(gulp, options) {
           throw err;
         }
         return true;
-      })
-      .pipe(source(options.browserify.out))
-      .pipe(buffer())
-      .pipe($.util.env.type !== 'production' ? $.sourcemaps.init({loadMaps: true}) : $.util.noop())
-      .pipe($.util.env.type === 'production' ? $.uglify() : $.util.noop())
-      .pipe($.util.env.type !== 'production' ? $.sourcemaps.write('./') : $.util.noop())
-      .pipe(gulp.dest(options.browserify.dist));
+      });
+    pipe = pipe.pipe(source(options.browserify.out));
+    pipe = pipe.pipe(buffer());
+
+    if (buildType !== PRODUCTION_BUILD_TYPE) {
+      pipe = pipe.pipe($.sourcemaps.init({loadMaps: true}));
+    }
+    if (buildType === PRODUCTION_BUILD_TYPE) {
+      pipe = pipe.pipe($.uglify());
+    }
+    if (buildType !== PRODUCTION_BUILD_TYPE) {
+      pipe = pipe.pipe($.sourcemaps.write('./'));
+    }
+    pipe = pipe.pipe(gulp.dest(options.browserify.dist));
+    return pipe;
   }
 
   if (!options.browserify.skip) {

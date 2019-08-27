@@ -19,7 +19,7 @@ module.exports = function(gulp, options) {
       buildTasks.push(options.taskPrefix + 'copy-resources');
     }
 
-    if (!options.browserify.skip) {
+    if (!options.browserify.ski
       buildTasks.push(options.taskPrefix + 'build-app');
       tasks.browserify.createBundler();
     }
