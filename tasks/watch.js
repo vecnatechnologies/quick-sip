@@ -70,9 +70,9 @@ module.exports = function(gulp, options) {
     }
 
     if (options.clean.skip) {
-      return gulp.series(options.taskPrefix + 'jshint', buildTasks);
+      return gulp.series(options.taskPrefix + 'jshint', buildTasks)(callback);
     } else {
-      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks);
+      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks)(callback);
     }
   });
 };
