@@ -45,7 +45,7 @@ module.exports = function(gulp, options) {
   }
 
   /* Watch build */
-  gulp.task(, function() {
+  gulp.task(taskName, function() {
     var buildTasks = [];
 
     if (!options.styles.skip) {
