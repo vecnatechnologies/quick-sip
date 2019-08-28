@@ -32,7 +32,7 @@ module.exports = function(gulp, options) {
     buildSeriesTasks.push(options.taskPrefix + 'clean');
   }
 
-  if (_.isEmpty(buildParallelTasks)) {
+  if (!_.isEmpty(buildParallelTasks)) {
     buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
   }
   buildSeriesTasks.push(browserifyCompleteFn);
