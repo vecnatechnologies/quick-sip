@@ -9,6 +9,11 @@ module.exports = function(gulp, options) {
   var tasks = createBundleTasks(gulp, options);
   var taskName = options.taskPrefix + 'watch';
 
+  function createWatchifyBundler(done) {
+    tasks.browserify.createWatchifyBundler();
+    done();
+  }
+
   /* Handle single resource events for watch */
   function copyResource(evt, callback) {
     var status = evt.type;
@@ -46,6 +51,7 @@ module.exports = function(gulp, options) {
   }
 
   var buildParallelTasks = [];
+  var buildSeriesTasks = [];
   if (!options.styles.skip) {
     buildParallelTasks.push(options.taskPrefix + 'build-styles');
   }
@@ -55,10 +61,10 @@ module.exports = function(gulp, options) {
   }
 
   if (!options.browserify.skip) {
-    tasks.browserify.createWatchifyBundler();
+    buildSeriesTasks.push(createWatchifyBundler);
   }
 
-  var buildSeriesTasks = [ options.taskPrefix + 'jshint' ];
+  buildSeriesTasks.push(options.taskPrefix + 'jshint');
 
   if (!options.clean.skip) {
     buildSeriesTasks.push(options.taskPrefix + 'clean');

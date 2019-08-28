@@ -7,12 +7,19 @@ module.exports = function(gulp, options) {
   var logPrefix = '['  + taskName + '] ';
   var tasks = createBundleTasks(gulp, options);
 
+  function createBundler(done) {
+    tasks.browserify.createBundler();
+    done();
+  }
+
   function browserifyCompleteFn(done) {
     log.mark(logPrefix + 'complete!');
     done();
   }
 
   var buildParallelTasks = [];
+  var buildSeriesTasks = [];
+
   if (!options.styles.skip) {
     buildParallelTasks.push(options.taskPrefix + 'build-styles');
   }
@@ -23,10 +30,10 @@ module.exports = function(gulp, options) {
 
   if (!options.browserify.skip) {
     buildParallelTasks.push(options.taskPrefix + 'build-app');
-    tasks.browserify.createBundler();
+    buildSeriesTasks.push(createBundler);
   }
 
-  var buildSeriesTasks = [ options.taskPrefix + 'jshint' ];
+  buildSeriesTasks.push(options.taskPrefix + 'jshint');
 
   if (!options.clean.skip) {
     buildSeriesTasks.push(options.taskPrefix + 'clean');
