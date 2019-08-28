@@ -6,6 +6,7 @@ var createBundleTasks = require('./utils/createBundleTasks');
 
 module.exports = function(gulp, options) {
   var tasks = createBundleTasks(gulp, options);
+  var taskName = options.taskPrefix + 'watch';
 
   /* Handle single resource events for watch */
   function copyResource(evt, callback) {
@@ -23,28 +24,28 @@ module.exports = function(gulp, options) {
     var relPath = pathLib.relative(copySrcPath, srcPath);
 
     if (status === 'changed') {
-      log.mark('[MODIFY] --> ' + relPath);
+      log.mark('[MODIFY: ' + taskName + '] --> ' + relPath);
       return gulp.src(srcPath)
         .pipe($.concat(relPath))
         .pipe(gulp.dest(destPath));
     } else if (status === 'added') {
-      log.mark('[ADDED] --> ' + relPath);
+      log.mark('[ADDED: ' + taskName + '] --> ' + relPath);
       return gulp.src(srcPath)
         .pipe($.concat(relPath))
         .pipe(gulp.dest(destPath));
     } else if (status === 'renamed') {
-      log.mark('[RENAMED] --> ' + relPath);
+      log.mark('[RENAMED: ' + taskName + '] --> ' + relPath);
       return gulp.src(srcPath)
         .pipe($.concat(relPath))
         .pipe(gulp.dest(destPath));
     } else if (status === 'deleted') {
-      log.mark('[DELETED] --> ' + relPath);
+      log.mark('[DELETED: ' + taskName + '] --> ' + relPath);
       del(destPath + '/' + relPath, callback);
     }
   }
 
   /* Watch build */
-  gulp.task(options.taskPrefix + 'watch', function() {
+  gulp.task(, function() {
     var buildTasks = [];
 
     if (!options.styles.skip) {

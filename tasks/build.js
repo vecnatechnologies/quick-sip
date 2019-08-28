@@ -34,8 +34,6 @@ module.exports = function(gulp, options) {
   buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
   buildSeriesTasks.push(browserifyCompleteFn);
 
-  log.mark('SERIES: ' + buildSeriesTasks);
-  log.mark('PARALLEL: ' + buildParallelTasks);
   var allGulpBuildTasks = gulp.series(buildSeriesTasks);
 
   /* Full build */
