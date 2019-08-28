@@ -1,4 +1,5 @@
 var $ = require('gulp-load-plugins')({});
+var _ = require('lodash');
 var del = require('del');
 var log = require('color-log');
 var pathLib = require('path');
@@ -63,11 +64,11 @@ module.exports = function(gulp, options) {
     buildSeriesTasks.push(options.taskPrefix + 'clean');
   }
 
-  buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+  if (!_.isEmpty(buildParallelTasks)) {
+    buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+  }
 
   function watchBuild() {
-    var buildTasks = [];
-
     if (!options.styles.skip) {
       gulp.watch(options.styles.src + '/**/*.scss', gulp.series(options.taskPrefix + 'build-styles'));
     }

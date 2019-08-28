@@ -1,15 +1,16 @@
-var $ = require('gulp-load-plugins')({}),
-    fs = require('fs'),
-    log = require('color-log');
+var $ = require('gulp-load-plugins')({});
+var fs = require('fs');
+var log = require('color-log');
 
 module.exports = function(gulp, options) {
-
   if (!options.copy.skip) {
     /* Copy all resources to dist */
     var taskName = options.taskPrefix + 'copy-resources';
-    gulp.task(taskName, function() {
-      var bytes = 0,
-          startTime = +new Date();
+    var logPrefix = '[' + taskName + '] ';
+
+    function copyResources(done) {
+      var bytes = 0;
+      var startTime = +new Date();
 
       return gulp.src(options.copy.buildFullSrcArray())
         .pipe($.tap(function(file, callback) {
@@ -20,8 +21,9 @@ module.exports = function(gulp, options) {
         .pipe($.concat('tmp'))
         .pipe($.tap(function() {
           var endTime = +new Date();
-          log.mark('[' + taskName + '] ' + bytes + ' bytes written (' + (endTime - startTime)/1000.0 + ' seconds)');
+          log.mark(logPrefix + bytes + ' bytes written (' + (endTime - startTime)/1000.0 + ' seconds)');
         }));
-    });
+    }
+    gulp.task(taskName, copyResources);
   }
 };

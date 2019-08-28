@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var log = require('color-log');
 var createBundleTasks = require('./utils/createBundleTasks');
 
@@ -31,7 +32,9 @@ module.exports = function(gulp, options) {
     buildSeriesTasks.push(options.taskPrefix + 'clean');
   }
 
-  buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+  if (_.isEmpty(buildParallelTasks)) {
+    buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+  }
   buildSeriesTasks.push(browserifyCompleteFn);
 
   var allGulpBuildTasks = gulp.series(buildSeriesTasks);

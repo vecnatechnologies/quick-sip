@@ -1,15 +1,16 @@
-var cleanTaskGenerator = require('../clean'),
-    copyTaskGenerator = require('../copy-resources'),
-    stylesTaskGenerator = require('../build-styles'),
-    browserifyTaskGenerator = require('../build-app'),
-    jshintTaskGenerator = require('../jshint');
+var cleanTaskGenerator = require('../clean');
+var copyTaskGenerator = require('../copy-resources');
+var stylesTaskGenerator = require('../build-styles');
+var browserifyTaskGenerator = require('../build-app');
+var jshintTaskGenerator = require('../jshint');
 
 // Initialized stores whether a task with a particular prefix was initialized before
 var taskCache = {};
 
 module.exports = function(gulp, options) {
-  var tasks = {},
-      taskPrefix = options.taskPrefix;
+  var tasks = {};
+  var taskPrefix = options.taskPrefix;
+
   if (!taskCache[taskPrefix]) {
     tasks.copy = copyTaskGenerator(gulp, options);
     tasks.styles = stylesTaskGenerator(gulp, options);
