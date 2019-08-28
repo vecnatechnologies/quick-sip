@@ -44,36 +44,49 @@ module.exports = function(gulp, options) {
     }
   }
 
-  /* Watch build */
-  gulp.task(taskName, function() {
+  var buildParallelTasks = [];
+  if (!options.styles.skip) {
+    buildParallelTasks.push(options.taskPrefix + 'build-styles');
+  }
+
+  if (!options.copy.skip) {
+    buildParallelTasks.push(options.taskPrefix + 'copy-resources');
+  }
+
+  if (!options.browserify.skip) {
+    tasks.browserify.createWatchifyBundler();
+  }
+
+  var buildSeriesTasks = [ options.taskPrefix + 'jshint' ];
+
+  if (!options.clean.skip) {
+    buildSeriesTasks.push(options.taskPrefix + 'clean');
+  }
+
+  buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+
+  function watchBuild() {
     var buildTasks = [];
 
     if (!options.styles.skip) {
-      buildTasks.push(options.taskPrefix + 'build-styles');
-      gulp.watch(options.styles.src + '/**/*.scss', [options.taskPrefix + 'build-styles']);
+      gulp.watch(options.styles.src + '/**/*.scss', gulp.series(options.taskPrefix + 'build-styles'));
     }
 
     if (!options.copy.skip) {
-      buildTasks.push(options.taskPrefix + 'copy-resources');
       gulp.watch([
         options.copy.src + '/**/*.*',
         '!' + options.copy.src + '/**/*.+(' + options.copy.excludes +')',
       ], copyResource);
     }
 
-    if (!options.browserify.skip) {
-      buildTasks.push(options.taskPrefix + 'build-app');
-      tasks.browserify.createWatchifyBundler();
-    }
-
     if (!options.jshint.skip) {
       gulp.watch(options.jshint.src, gulp.series(options.taskPrefix + 'jshint'));
     }
+  }
+  buildSeriesTasks.push(watchBuild);
 
-    if (options.clean.skip) {
-      return gulp.series(options.taskPrefix + 'jshint', buildTasks)(callback);
-    } else {
-      return gulp.series(options.taskPrefix + 'jshint', options.taskPrefix + 'clean', buildTasks)(callback);
-    }
-  });
+  var allGulpWatchTasks = gulp.series(buildSeriesTasks);
+
+  /* Watch build */
+  gulp.task(taskName, allGulpWatchTasks);
 };
