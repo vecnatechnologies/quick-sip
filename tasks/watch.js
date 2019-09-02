@@ -8,11 +8,7 @@ var createBundleTasks = require('./utils/createBundleTasks');
 module.exports = function(gulp, options) {
   var tasks = createBundleTasks(gulp, options);
   var taskName = options.taskPrefix + 'watch';
-
-  function createWatchifyBundler(done) {
-    tasks.browserify.createWatchifyBundler();
-    done();
-  }
+  var logPrefix = '[' + taskName + '] ';
 
   /* Handle single resource events for watch */
   function copyResource(evt, callback) {
@@ -60,10 +56,6 @@ module.exports = function(gulp, options) {
     buildParallelTasks.push(options.taskPrefix + 'copy-resources');
   }
 
-  if (!options.browserify.skip) {
-    buildSeriesTasks.push(createWatchifyBundler);
-  }
-
   buildSeriesTasks.push(options.taskPrefix + 'jshint');
 
   if (!options.clean.skip) {
@@ -72,6 +64,11 @@ module.exports = function(gulp, options) {
 
   if (!_.isEmpty(buildParallelTasks)) {
     buildSeriesTasks.push(gulp.parallel(buildParallelTasks));
+  }
+
+  if (!options.browserify.skip) {
+    buildSeriesTasks.push(options.taskPrefix + 'build-app');
+    tasks.browserify.createWatchifyBundler();
   }
 
   function watchBuild() {
@@ -89,6 +86,7 @@ module.exports = function(gulp, options) {
     if (!options.jshint.skip) {
       gulp.watch(options.jshint.src, gulp.series(options.taskPrefix + 'jshint'));
     }
+    log.mark(logPrefix + '- Watch ready!');
   }
   buildSeriesTasks.push(watchBuild);
 
