@@ -98,7 +98,7 @@ module.exports = function(gulp, options) {
       configureBrowserify(browserifyBundler);
       browserifyBundler.on('update', bundle);
       browserifyBundler.on('update', function(changedFile) {
-        log.mark(logPrefix + ' browserifying: ' + changedFile + ' ...');
+        log.mark(logPrefix + 'browserifying: ' + changedFile + ' ...');
       });
       browserifyBundler.on('log', function(data) {
         log.mark(logPrefix + data.toString());
