@@ -7,6 +7,11 @@ module.exports = function(gulp, options) {
   var logPrefix = '['  + taskName + '] ';
   var tasks = createBundleTasks(gulp, options);
 
+  function createBundler(done) {
+    tasks.browserify.createBundler();
+    done();
+  }
+
   function browserifyCompleteFn(done) {
     log.mark(logPrefix + 'complete!');
     done();
@@ -25,7 +30,7 @@ module.exports = function(gulp, options) {
 
   if (!options.browserify.skip) {
     buildParallelTasks.push(options.taskPrefix + 'build-app');
-    tasks.browserify.createBundler();
+    buildSeriesTasks.push(createBundler);
   }
 
   buildSeriesTasks.push(options.taskPrefix + 'jshint');
