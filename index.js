@@ -6,5 +6,5 @@ module.exports = function(gulp, bundleOptions) {
   var defaultOptions = generateOptions();
   var options = defaultOptions.update(bundleOptions);
   buildTaskGenerator(gulp, options);
-  watchTaskGenerator(gulp, options);
+  return watchTaskGenerator(gulp, options);
 };

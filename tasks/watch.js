@@ -94,4 +94,6 @@ module.exports = function(gulp, options) {
 
   /* Watch build */
   gulp.task(taskName, allGulpWatchTasks);
+
+  return watchBuild;
 };
