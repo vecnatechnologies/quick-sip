@@ -1,16 +1,17 @@
-var _ = require('lodash');
-var $ = require('gulp-load-plugins')({});
-var minimist = require('minimist');
+const _ = require('lodash');
+const minimist = require('minimist');
 
-var PRODUCTION_BUILD_TYPE = 'production';
+const PRODUCTION_BUILD_TYPE = 'production';
+
+const argv = minimist(process.argv.slice(2));
+const buildType = argv.type;
+const IS_PRODUCTION_BUILD = buildType === PRODUCTION_BUILD_TYPE;
 
 // Function creates a new options object each time
 // This options object should be generated once for each execution of quick-sip
 // and passed into all task registrations that require this object
 module.exports = function() {
-  var argv = minimist(process.argv.slice(2));
-  var buildType = argv.type;
-  var baseDefaults = {
+  const baseDefaults = {
     taskPrefix: '',
     src: 'app',
     dist: 'dist',
@@ -33,7 +34,7 @@ module.exports = function() {
         transforms: [],
         out: 'app.js',
         failOnError: false,
-        debug: buildType !== PRODUCTION_BUILD_TYPE,
+        debug: !IS_PRODUCTION_BUILD,
         dist: opts.dist
       },
       styles: {
@@ -44,7 +45,8 @@ module.exports = function() {
         dist: opts.dist
       },
       jshint: {
-        src: './' + opts.src + '/**/*.js',
+        src: './' + opts.src,
+        globRelativeToSrc: '**/*.js',
         skip: false,
         stopOnFail: true,
         config: {}
@@ -60,7 +62,7 @@ module.exports = function() {
          * Takes in an optional source location, defaults to the copy.src setting if not provided.
          */
         _buildSrcExclusionPair: function(optionalSrc) {
-          var sourceLoc = optionalSrc || this.src;
+          const sourceLoc = optionalSrc || this.src;
           return [
               sourceLoc + '/**/*.*',
               '!' + sourceLoc + '/**/*.+(' + this.excludes + ')'
@@ -72,7 +74,7 @@ module.exports = function() {
          * Each item in the copy.src array will construct a new pair. If copy.src is just a single item, return the single pair.
          */
         buildFullSrcArray: function() {
-          var copyOptions = this;
+          const copyOptions = this;
           if (Array.isArray(this.src)) {
             return this.src.map(function(entry) {
               return copyOptions._buildSrcExclusionPair(entry);
@@ -87,12 +89,12 @@ module.exports = function() {
     };
   }
 
-  var options = _.merge({}, baseDefaults, generateBundleDefaults(baseDefaults));
+  const options = _.merge({}, baseDefaults, generateBundleDefaults(baseDefaults));
 
   // Update options
   // For certain options, if a key isn't defined at the task level, it will default to the value specified at the top level
   options.update = function(newOptions) {
-    var bundleDefaults = generateBundleDefaults(_.merge({}, baseDefaults, newOptions));
+    const bundleDefaults = generateBundleDefaults(_.merge({}, baseDefaults, newOptions));
 
     return _.merge(options, bundleDefaults, newOptions);
   };

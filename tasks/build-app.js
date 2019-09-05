@@ -1,109 +1,147 @@
-var $ = require('gulp-load-plugins')({});
-var _ = require('lodash');
-var log = require('color-log');
-var watchify = require('watchify');
-var browserify = require('browserify');
-var currentDateTime = require('./utils/currentDateTime');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var minimist = require('minimist');
+const $ = require('gulp-load-plugins')({});
+const _ = require('lodash');
+const log = require('color-log');
+const watchify = require('watchify');
+const browserify = require('browserify');
+const currentDateTime = require('./utils/currentDateTime');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const minimist = require('minimist');
+const path = require('path');
 
-var PRODUCTION_BUILD_TYPE = 'production';
+const PRODUCTION_BUILD_TYPE = 'production';
+const JS_EXTENSION = '.js';
+
+const argv = minimist(process.argv.slice(2));
+const buildType = argv.type;
+const IS_PRODUCTION_BUILD = buildType === PRODUCTION_BUILD_TYPE;
 
 module.exports = function(gulp, options) {
-  var taskName = options.taskPrefix + 'build-app';
-  var logPrefix = '['  + taskName + '] ';
-  var argv = minimist(process.argv.slice(2));
-  var buildType = argv.type;
-  var rootFileToBrowserify = options.browserify.root;
-  if (!rootFileToBrowserify.endsWith('.js')) {
-    rootFileToBrowserify += '.js';
+  if (options.browserify.skip) {
+    return;
   }
-  var browserifyDestination = options.browserify.dist;
 
-  var browserifyBundler;
+  return {
+    build: createBrowserifyTask(gulp, options.taskPrefix, options.browserify, false),
+    watch: createBrowserifyTask(gulp, options.taskPrefix, options.browserify, true)
+  };
+};
 
-  function generateBrowserifyArguments() {
-    log.info(logPrefix + 'browserifying: ' + rootFileToBrowserify + ' --> ' + browserifyDestination);
-    var browserifyArgs = _.clone(watchify.args);
-    browserifyArgs.debug = options.browserify.debug;
-    if (!browserifyArgs.entries) {
-      browserifyArgs.entries = [];
+function createBrowserifyTask(gulp, taskPrefix, options, isWatch) {
+  options = normalizeOptions(taskPrefix, options, isWatch);
+
+  const browserifyArgs = generateBrowserifyArguments(options);
+  const bundler = browserify(browserifyArgs);
+  const bundleTask = createBundleTaskFxn(gulp, bundler, options);
+  configureBrowserify(bundler, bundleTask, options);
+
+  return bundleTask;
+}
+
+function normalizeOptions(taskPrefix, options, isWatch) {
+  let taskName = taskPrefix + 'build-app';
+  if (isWatch) {
+    taskName += '-watch';
+  }
+  const logPrefix = '['  + taskName + '] ';
+
+  let root = options.root;
+  if (!root.endsWith(JS_EXTENSION)) {
+    root += JS_EXTENSION;
+  }
+
+  const bundleFileName = path.basename(options.out);
+
+  const normalizedOptions = {
+    isWatch: isWatch,
+    root: root,
+    taskName: taskName,
+    logPrefix: logPrefix,
+    bundleFileName: bundleFileName
+  };
+
+  return _.defaultsDeep(normalizedOptions, options);
+}
+
+function generateBrowserifyArguments(options) {
+  const browserifyArgs = _.clone(watchify.args);
+  browserifyArgs.debug = options.debug;
+  browserifyArgs.entries = options.root;
+  return browserifyArgs;
+}
+
+function configureBrowserify(bundler, bundleTask, options) {
+  if (options.isWatch) {
+    watchifyBundler(bundler, bundleTask, options);
+  }
+
+  options.transforms.forEach(function(transform) {
+    if (transform.transform) {
+      bundler.transform(transform.transform, transform.options);
+    } else {
+      bundler.transform(transform);
     }
-    browserifyArgs.entries.push(rootFileToBrowserify);
-    return browserifyArgs;
-  }
+  });
+  bundler.on('log', function(data) {
+    log.mark(options.logPrefix + options.bundleFileName + ' ' + data.toString());
+  });
+}
 
-  function configureBrowserify(configureBrowserifyBundler) {
-    options.browserify.transforms.forEach(function(transform) {
-      if (transform.transform) {
-        configureBrowserifyBundler.transform(transform.transform, transform.options);
-      } else {
-        configureBrowserifyBundler.transform(transform);
-      }
-    });
-  }
+function watchifyBundler(bundler, bundleTask, options) {
+  bundler = watchify(bundler);
+  bundler.continueOnError = true;
 
+  bundler.on('update', function(changedFile) {
+    log.mark(options.logPrefix + 'browserifying ' + options.bundleFileName);
+    log.info(options.logPrefix + '  ' + changedFile)
+  });
+  bundler.on('update', bundleTask);
+  bundler.on('ready', function() {
+    log.mark(options.logPrefix + 'watchify ready!');
+  });
+}
+
+function createBundleTaskFxn(gulp, bundler, options) {
   /* Actually bundle the stuff being browserified */
   /* Reduce all javascript to app.js */
-  function bundle() {
-    var pipe = browserifyBundler.bundle();
-    pipe = pipe.on('error', function(err) {
+  function bundleTask() {
+    const taskVerb = options.isWatch ? 'watchifying' : 'browserifying';
+    log.mark(options.logPrefix + taskVerb + ': ' + options.bundleFileName);
+    const fullOutPath = path.join(options.dist, options.out);
+    log.info(options.root + ' --> ' + fullOutPath);
+
+    let bundle = bundler.bundle();
+    bundle.on('error', function(err) {
       delete err.stream;
-      log.error(logPrefix + ' @ ' + currentDateTime());
+      log.error(options.logPrefix + ' @ ' + currentDateTime());
       log.warn(err.toString());
-      if (!browserifyBundler.continueOnError && options.browserify.failOnError) {
+      if (!bundler.continueOnError && options.failOnError) {
+        log.error(options.logPrefix + 'Ending browserify stream.');
         throw err;
       }
       return true;
     });
-    pipe = pipe.pipe(source(options.browserify.out));
-    pipe = pipe.pipe(buffer());
+    if (options.isWatch) {
+      bundle.on('end', function() {
+        log.info(options.logPrefix + options.bundleFileName + ' has completed @ ' + currentDateTime());
+      });
+    }
+    bundle = bundle.pipe(source(options.out));
+    bundle = bundle.pipe(buffer());
 
-    if (buildType !== PRODUCTION_BUILD_TYPE) {
-      pipe = pipe.pipe($.sourcemaps.init({loadMaps: true}));
+    if (!IS_PRODUCTION_BUILD) {
+      bundle = bundle.pipe($.sourcemaps.init({loadMaps: true}));
     }
-    if (buildType === PRODUCTION_BUILD_TYPE) {
-      pipe = pipe.pipe($.uglify());
+    if (IS_PRODUCTION_BUILD) {
+      bundle = bundle.pipe($.uglify());
     }
-    if (buildType !== PRODUCTION_BUILD_TYPE) {
-      pipe = pipe.pipe($.sourcemaps.write('./'));
+    if (!IS_PRODUCTION_BUILD) {
+      bundle = bundle.pipe($.sourcemaps.write('./'));
     }
-    return pipe.pipe(gulp.dest(browserifyDestination));
+    return bundle.pipe(gulp.dest(options.dist));
   }
 
-  if (!options.browserify.skip) {
-    /* Reduce all javascript to app.js */
-    gulp.task(taskName, bundle);
-  }
+  bundleTask.taskName = options.taskName;
 
-  return {
-    createBundler: function() {
-      var browserifyArgs = generateBrowserifyArguments();
-      log.info('Browserify args: ' + JSON.stringify(browserifyArgs));
-      browserifyBundler = browserify(browserifyArgs);
-      configureBrowserify(browserifyBundler);
-      browserifyBundler.on('log', function(data) {
-        log.mark(logPrefix + data.toString());
-      });
-      return browserifyBundler;
-    },
-
-    createWatchifyBundler: function() {
-      var browserifyArgs = generateBrowserifyArguments();
-      log.info('Watchify args: ' + JSON.stringify(browserifyArgs));
-      browserifyBundler = browserify(browserifyArgs);
-      browserifyBundler = watchify(browserifyBundler);
-      browserifyBundler.continueOnError = true;
-      configureBrowserify(browserifyBundler);
-      browserifyBundler.on('update', bundle);
-      browserifyBundler.on('update', function(changedFile) {
-        log.mark(logPrefix + 'browserifying: ' + changedFile + ' ...');
-      });
-      browserifyBundler.on('log', function(data) {
-        log.mark(logPrefix + data.toString());
-      });
-      return browserifyBundler;
-    }
-  };
-};
+  return bundleTask;
+}

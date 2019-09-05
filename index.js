@@ -1,10 +1,8 @@
-var buildTaskGenerator = require('./tasks/build');
-var watchTaskGenerator = require('./tasks/watch');
-var generateOptions = require('./tasks/utils/options');
+const createBundleTasks = require('./tasks/utils/createBundleTasks');
+const generateOptions = require('./tasks/utils/options');
 
 module.exports = function(gulp, bundleOptions) {
-  var defaultOptions = generateOptions();
-  var options = defaultOptions.update(bundleOptions);
-  buildTaskGenerator(gulp, options);
-  return watchTaskGenerator(gulp, options);
+  const defaultOptions = generateOptions();
+  const options = defaultOptions.update(bundleOptions);
+  return createBundleTasks(gulp, options);
 };

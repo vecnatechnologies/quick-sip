@@ -1,15 +1,26 @@
-var del = require('del');
-var log = require('color-log');
+const del = require('del');
+const log = require('color-log');
 
 module.exports = function(gulp, options) {
-  if (!options.clean.skip) {
-    /* Clean the options.clean.dist directory */
-    var taskName = options.taskPrefix + 'clean';
-    gulp.task(taskName, function(callback) {
-      log.mark('[' + taskName + '] deleting ' + options.clean.dist);
-      del(options.clean.dist, options.clean).then(function() {
+  if (options.clean.skip) {
+    return;
+  }
+
+  /* Clean the options.clean.dist directory */
+  const taskName = options.taskPrefix + 'clean';
+  const logPrefix = '[' + taskName + '] ';
+
+  function clean(callback) {
+    log.info(logPrefix + 'deleting ' + options.clean.dist);
+    del(options.clean.dist, options.clean)
+      .then(function() {
+        callback();
+      }, function(error) {
+        log.error(logPrefix + 'clean task errored');
+        log.error(error);
         callback();
       });
-    });
   }
+
+  return clean;
 };

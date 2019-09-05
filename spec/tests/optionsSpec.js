@@ -2,8 +2,8 @@ var generateOptions = require('../../tasks/utils/options');
 
 describe('Options', function() {
   it('should produce a unique object every time its run', function() {
-    var options1 = generateOptions(),
-        options2 = generateOptions();
+    var options1 = generateOptions();
+    var options2 = generateOptions();
 
     options1.foo = 'bar';
     expect(options2.bar).toBeUndefined();
@@ -32,10 +32,10 @@ describe('Options', function() {
 
     it('should be able to update bundle options', function() {
       var options = this.defaultOptions.update({
-            clean: {
-              dist: testDistValue
-            }
-          });
+        clean: {
+          dist: testDistValue
+        }
+      });
 
       expect(options.clean.dist).toBe(testDistValue);
     });
