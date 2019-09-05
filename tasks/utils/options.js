@@ -5,7 +5,9 @@ const PRODUCTION_BUILD_TYPE = 'production';
 
 const argv = minimist(process.argv.slice(2));
 const buildType = argv.type;
-const IS_PRODUCTION_BUILD = buildType === PRODUCTION_BUILD_TYPE;
+// Assume production build by default.  Allow override (set to anything but production) for 'dev' build.
+const IS_PRODUCTION_BUILD = !buildType || buildType === PRODUCTION_BUILD_TYPE;
+const IS_DEV_BUILD = !IS_PRODUCTION_BUILD;
 
 // Function creates a new options object each time
 // This options object should be generated once for each execution of quick-sip
@@ -18,6 +20,7 @@ module.exports = function() {
     clean: {},
     browserify: {},
     styles: {},
+    jshint: {},
     copy: {}
   };
 
@@ -34,8 +37,9 @@ module.exports = function() {
         transforms: [],
         out: 'app.js',
         failOnError: false,
-        debug: !IS_PRODUCTION_BUILD,
-        dist: opts.dist
+        debug: IS_DEV_BUILD,
+        dist: opts.dist,
+        skipUglify: IS_DEV_BUILD
       },
       styles: {
         skip: false,

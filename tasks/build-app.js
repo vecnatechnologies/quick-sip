@@ -6,15 +6,9 @@ const browserify = require('browserify');
 const currentDateTime = require('./utils/currentDateTime');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
-const minimist = require('minimist');
 const path = require('path');
 
-const PRODUCTION_BUILD_TYPE = 'production';
 const JS_EXTENSION = '.js';
-
-const argv = minimist(process.argv.slice(2));
-const buildType = argv.type;
-const IS_PRODUCTION_BUILD = buildType === PRODUCTION_BUILD_TYPE;
 
 module.exports = function(gulp, options) {
   if (options.browserify.skip) {
@@ -121,24 +115,23 @@ function createBundleTaskFxn(gulp, bundler, options) {
       }
       return true;
     });
+
     if (options.isWatch) {
       bundle.on('end', function() {
         log.info(options.logPrefix + options.bundleFileName + ' has completed @ ' + currentDateTime());
       });
     }
-    bundle = bundle.pipe(source(options.out));
-    bundle = bundle.pipe(buffer());
 
-    if (!IS_PRODUCTION_BUILD) {
-      bundle = bundle.pipe($.sourcemaps.init({loadMaps: true}));
-    }
-    if (IS_PRODUCTION_BUILD) {
+    bundle = bundle.pipe(source(options.out))
+      .pipe(buffer())
+      .pipe($.sourcemaps.init({loadMaps: true}));
+
+    if (!options.skipUglify) {
       bundle = bundle.pipe($.uglify());
     }
-    if (!IS_PRODUCTION_BUILD) {
-      bundle = bundle.pipe($.sourcemaps.write('./'));
-    }
-    return bundle.pipe(gulp.dest(options.dist));
+
+    return bundle.pipe($.sourcemaps.write('./'))
+      .pipe(gulp.dest(options.dist));
   }
 
   bundleTask.taskName = options.taskName;
