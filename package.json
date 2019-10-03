@@ -28,7 +28,7 @@
     "jshint-stylish": "^2.2.1",
     "lodash": "^4.17.15",
     "minimist": "^1.2.0",
-    "snyk": "^1.228.3",
+    "snyk": "^1.228.5",
     "through2": "^3.0.1",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
