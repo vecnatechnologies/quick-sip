@@ -31,7 +31,8 @@
     "through2": "^3.0.1",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "snyk": "^1.316.1"
   },
   "engines": {
     "node": ">=0.8.0"
@@ -44,8 +45,7 @@
   },
   "snyk": true,
   "devDependencies": {
-    "release-it": "^12.3.5",
-    "snyk": "^1.230.5"
+    "release-it": "^12.3.5"
   },
   "release-it": {
     "github": {
