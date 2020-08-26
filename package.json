@@ -11,7 +11,7 @@
   "license": "MIT",
   "version": "1.0.1",
   "dependencies": {
-    "browserify": "^16.5.1",
+    "browserify": "^16.5.2",
     "color-log": "0.0.2",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
