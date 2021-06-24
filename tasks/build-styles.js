@@ -1,4 +1,5 @@
 const $ = require('gulp-load-plugins')({});
+const sass = require('gulp-dart-sass');
 const log = require('color-log');
 const currentDateTime = require('./utils/currentDateTime');
 const addWatchListeners = require('./utils/add-watch-listeners');
@@ -19,7 +20,7 @@ module.exports = function(gulp, options) {
     const logPrefix = '['  + taskName + '] ';
 
     let pipe = gulp.src(options.styles.root)
-      .pipe($.sass({
+      .pipe(sass({
         file: options.styles.root,
         includePaths: options.styles.includes
       })
