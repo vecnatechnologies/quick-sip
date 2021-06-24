@@ -29,7 +29,7 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.5",
     "sass": "^1.35.1",
-    "snyk": "^1.608.0",
+    "snyk": "^1.616.0",
     "through2": "^3.0.2",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
