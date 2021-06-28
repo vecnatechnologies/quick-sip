@@ -9,7 +9,7 @@
     "url": "https://github.com/vecnatechnologies/quick-sip/issues"
   },
   "license": "MIT",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "dependencies": {
     "browserify": "^16.5.2",
     "color-log": "0.0.2",
